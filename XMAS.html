@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Christmas Website</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: 'Arial', sans-serif;
+            background-image: url('christmas-6828416.jpg');
+            background-position: center;
+            background-size: cover;
+            
+
+        }
+
+        .container {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+        }
+
+        .page {
+            position: absolute;
+            width: 100%;
+            height: 100vh;
+            transition: transform 1s ease-in-out;
+        }
+
+        .santa-page {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            color: white;
+            text-align: center;
+        }
+
+        .santa-page img{
+            width: 200px;
+            height: auto;
+            animation: bounce 2s infinite;
+        }
+        
+
+    @keyframes bounce {
+        0% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.2); /* Enlarges the element */
+        }
+        100% {
+            transform: scale(1); /* Returns to normal size */
+        }
+    }
+
+        .main-page {
+            background: #4caf50;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            transform: translateY(100vh);
+            text-align: center;
+        }
+
+        .scratch-card {
+            position: relative;
+            width: 300px;
+            height: 150px;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+
+        .scratch-card canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .hidden-message {
+            display: none;
+            font-size: 20px;
+            font-weight: bold;
+            color: white;
+            margin-top: 20px;
+        }
+
+        .reset-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: white;
+            color: #4caf50;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            display: none;
+        }
+
+        .reset-button:hover {
+            background-color: #e0e0e0;
+        }
+        @font-face {
+            font-family: festival;
+            src: url(festival-font/Festival-r1g8.ttf);
+        }
+        @font-face {
+            font-family: snowy;
+            src: url(snowby-font/Snowby-DO0GD.ttf);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="page santa-page">
+            <img src="a.svg" alt="Santa Claus" style="padding: 0px;margin-bottom: -120px;">
+            <img src="b.png" alt="Christmas" style="width:600px ">
+
+
+        </div>
+        <div class="page main-page" >
+            <h1 style="font-family: festival;font-size:100px;margin-bottom: -10px;">Happy Christmas!</h1>
+            <p style="font-family: snowy;font-size: 30px;">Scratch The Card 👇</p>
+            <div class="scratch-card"  style="border-radius: 10px;background-color: aquamarine;">
+                <h1 style="font-family: fantasy;">You're Amazing Today !!!</h1>
+                <canvas >
+                </canvas>
+            </div>
+            <div class="hidden-message">Better Luck Next Year!</div>
+            <button class="reset-button">Reset</button>
+        </div>
+    </div>
+
+    <script>
+        // Scroll effect
+        setTimeout(() => {
+            const container = document.querySelector('.container');
+            const santaPage = container.children[0];
+            const mainPage = container.children[1];
+
+            santaPage.style.transform = 'translateY(-100vh)';
+            mainPage.style.transform = 'translateY(0)';
+        }, 3000);
+
+        // Scratch card functionality
+        const canvas = document.querySelector('.scratch-card canvas');
+        const ctx = canvas.getContext('2d');
+        const scratchCard = document.querySelector('.scratch-card');
+        const hiddenMessage = document.querySelector('.hidden-message');
+        const resetButton = document.querySelector('.reset-button');
+
+        const messages = [
+            "Better Luck Next Year!",
+            "Merry Christmas!",
+            "Happy Holidays!",
+            "Season's Greetings!"
+        ];
+
+        function setupScratchCard() {
+            canvas.width = scratchCard.offsetWidth;
+            canvas.height = scratchCard.offsetHeight;
+
+            ctx.fillStyle = '#F72C5B';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.globalCompositeOperation = 'source-over';
+
+            clearedPixels = 0; // Reset clearedPixels
+
+            hiddenMessage.style.display = 'none';
+            resetButton.style.display = 'none';
+            scratchCard.style.pointerEvents = 'auto';
+            hiddenMessage.textContent = messages[Math.floor(Math.random() * messages.length)];
+        }
+        function scratch(clientX, clientY) {
+            const rect = canvas.getBoundingClientRect();
+            const x = clientX - rect.left;
+            const y = clientY - rect.top;
+            ctx.globalCompositeOperation = 'destination-out';
+            ctx.beginPath();
+            ctx.arc(x, y, 50, 0, Math.PI * 2); // Increased radius to 50 for larger brush size
+            ctx.fill();
+            clearedPixels += Math.PI * 50 * 50; // Approximation of cleared area (πr²)
+        }
+
+        function checkScratchCompletion() {
+            const totalPixels = canvas.width * canvas.height;
+            if (clearedPixels / totalPixels > 0.5) { // If more than 50% is scratched
+                hiddenMessage.style.display = 'block';
+                resetButton.style.display = 'block';
+                scratchCard.style.pointerEvents = 'none';
+            }
+        }
+
+        let isDrawing = false;
+        let clearedPixels = 0;
+
+        canvas.addEventListener('mousedown', () => {
+            isDrawing = true;
+        });
+
+        canvas.addEventListener('touchstart', (e) => {
+            isDrawing = true;
+            e.preventDefault(); // Prevent scrolling
+        });
+
+        canvas.addEventListener('mouseup', () => {
+            isDrawing = false;
+            checkScratchCompletion();
+        });
+
+        canvas.addEventListener('touchend', () => {
+            isDrawing = false;
+            checkScratchCompletion();
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (isDrawing) {
+                scratch(e.clientX, e.clientY);
+            }
+        });
+
+        canvas.addEventListener('touchmove', (e) => {
+            if (isDrawing) {
+                const touch = e.touches[0];
+                scratch(touch.clientX, touch.clientY);
+                e.preventDefault(); // Prevent scrolling
+            }
+        });
+
+ 
+
+        resetButton.addEventListener('click', () => {
+            setupScratchCard();
+        });
+
+        setupScratchCard();
+    </script>
+</body>
+</html>
